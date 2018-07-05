@@ -50,6 +50,10 @@ func TestNewDataSource(t *testing.T) {
 			AuthType:                "keys",
 			CustomMetricsNamespaces: "SomeNamespace",
 			DefaultRegion:           "us-east-1",
+			ScrapeInterval:          "20s",
+			QueryTimeout:            "60s",
+			Method:                  "GET",
+			KeepCookies:             []string{"X-Grafana-Cookie"},
 		},
 		SecureJSONData: SecureJSONData{
 			AccessKey: "123",

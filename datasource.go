@@ -32,10 +32,14 @@ type DataSource struct {
 
 // JSONData is a representation of the datasource `jsonData` property
 type JSONData struct {
-	AssumeRoleArn           string `json:"assumeRoleArn,omitempty"`
-	AuthType                string `json:"authType,omitempty"`
-	CustomMetricsNamespaces string `json:"customMetricsNamespaces,omitempty"`
-	DefaultRegion           string `json:"defaultRegion,omitempty"`
+	AssumeRoleArn           string   `json:"assumeRoleArn,omitempty"`
+	AuthType                string   `json:"authType,omitempty"`
+	CustomMetricsNamespaces string   `json:"customMetricsNamespaces,omitempty"`
+	DefaultRegion           string   `json:"defaultRegion,omitempty"`
+	ScrapeInterval          string   `json:"timeInterval,omitempty"`
+	QueryTimeout            string   `json:"queryTimeout,omitempty"`
+	Method                  string   `json:"httpMethod,omitempty"`
+	KeepCookies             []string `json:"keepCookies,omitempty"`
 }
 
 // SecureJSONData is a representation of the datasource `secureJsonData` property
