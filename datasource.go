@@ -21,6 +21,7 @@ type DataSource struct {
 
 	OrgId     int64 `json:"orgId,omitempty"`
 	IsDefault bool  `json:"isDefault"`
+	ReadOnly  bool 	`json:"readOnly"`
 
 	BasicAuth         bool   `json:"basicAuth"`
 	BasicAuthUser     string `json:"basicAuthUser,omitempty"`
