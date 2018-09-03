@@ -12,9 +12,19 @@ import (
 
 
 type FolderCreateResponse struct {
-	Id     int `json:"id"`
-	uid    string `json:"uid"`
-	title  string `json:"title"`
+	Id        int    `json:"id"`
+	uid       string `json:"uid"`
+	title     string `json:"title"`
+	url       string `json:"url"`
+	hasAcl    bool   `json:"hasAcl"`
+	canSave   bool   `json:"canSave"`
+	canEdit   bool   `json:"canEdit"`
+	canAdmin  bool   `json:"canAdmin"`
+	createdBy string `json:"createdBy"`
+	created   string `json:"created"`
+	updatedBy string `json:"updatedBy"`
+	updated	  string `json:"updated"`
+	version   int    `json:"version"`
 }
 
 type Folder struct {
@@ -58,7 +68,7 @@ func (c *Client) CreateFolder(model map[string]interface{}) (*FolderCreateRespon
 	return result, err
 }
 
-func (c *Client) Folder(slug string) (*Folder, error) {
+func (c *Client) GetFolderByUID(slug string) (*Folder, error) {
 	path := fmt.Sprintf("/api/folders/%s", slug)
 	req, err := c.newRequest("GET", path, nil, nil)
 	if err != nil {
