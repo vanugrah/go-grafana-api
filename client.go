@@ -18,11 +18,6 @@ type Client struct {
 	*http.Client
 }
 
-// A GrafanaMessage contains the json error message received when http request failed
-type GrafanaErrorMessage struct {
-	Message string `json:"message"`
-}
-
 //New creates a new grafana client
 //auth can be in user:pass format, or it can be an api key
 func New(auth, baseURL string) (*Client, error) {

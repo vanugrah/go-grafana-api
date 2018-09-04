@@ -80,13 +80,19 @@ func (c *Client) GetFolderByUID(slug string) (*Folder, error) {
 		return nil, err
 	}
 
-	// If the error code is 404 that means that the folder does not exist. Don't treat this case as an error
-	if resp.StatusCode == 404 {
-		return nil, nil
-	}
-
 	if resp.StatusCode != 200 {
-		return nil, errors.New(resp.Status)
+		var gmsg GrafanaErrorMessage
+		dec := json.NewDecoder(resp.Body)
+		dec.Decode(&gmsg)
+		errMsg := fmt.Sprintf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
+
+		// TODO: Give support to other custom errors
+		switch resp.StatusCode {
+		case 404:
+			return nil, NewErrNotFound(errMsg)
+		default:
+			return nil, fmt.Errorf(errMsg)
+		}
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
