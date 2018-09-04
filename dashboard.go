@@ -21,6 +21,10 @@ type DashboardSaveResponse struct {
 	Version int64  `json:"version"`
 }
 
+type DashboardDeleteResponse struct {
+	Title	string 	`json:"title"`
+}
+
 type Dashboard struct {
 	Meta  DashboardMeta          `json:"meta"`
 	Model map[string]interface{} `json:"dashboard"`
