@@ -60,7 +60,7 @@ func (c *Client) SaveDashboard(d *DashboardSaveOpts) (*DashboardSaveResponse, er
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return nil, fmt.Errorf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
+		return nil, &GrafanaError{resp.StatusCode, gmsg.Message}
 	}
 
 	data, err = ioutil.ReadAll(resp.Body)
