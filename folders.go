@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"io/ioutil"
@@ -46,7 +47,7 @@ func (c *Client) GetAllFolders() ([]Folder, error) {
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return folders, GrafanaError{resp.StatusCode, gmsg.Message}
+		return folders, &GrafanaError{resp.StatusCode, gmsg.Message}
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
@@ -97,31 +98,31 @@ func (c *Client) GetAllFolders() ([]Folder, error) {
 // 	return result, err
 // }
 
-// func (c *Client) GetFolderByUID(uid string) (*Folder, error) {
-// 	path := fmt.Sprintf("/api/folders/%s", uid)
-// 	req, err := c.newRequest("GET", path, nil, nil)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+func (c *Client) GetFolderByUID(uid string) (*Folder, error) {
+	path := fmt.Sprintf("/api/folders/%s", uid)
+	req, err := c.newRequest("GET", path, nil, nil)
+	if err != nil {
+		return nil, err
+	}
 
-// 	resp, err := c.Do(req)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
 
-// 	if resp.StatusCode != 200 {
-// 		var gmsg GrafanaErrorMessage
-// 		dec := json.NewDecoder(resp.Body)
-// 		dec.Decode(&gmsg)
-// 		return nil, fmt.Errorf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
-// 	}
+	if resp.StatusCode != 200 {
+		var gmsg GrafanaErrorMessage
+		dec := json.NewDecoder(resp.Body)
+		dec.Decode(&gmsg)
+		return nil, &GrafanaError{resp.StatusCode, gmsg.Message}
+	}
 
-// 	data, err := ioutil.ReadAll(resp.Body)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 
-// 	result := &Folder{}
-// 	err = json.Unmarshal(data, &result)
-// 	return result, err
-// }
+	result := &Folder{}
+	err = json.Unmarshal(data, &result)
+	return result, err
+}
