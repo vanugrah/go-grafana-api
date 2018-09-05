@@ -126,3 +126,32 @@ func (c *Client) GetFolderByUID(uid string) (*Folder, error) {
 	err = json.Unmarshal(data, &result)
 	return result, err
 }
+
+func (c *Client) GetFolderByID(id int) (*Folder, error) {
+	path := fmt.Sprintf("/api/folders/id/%d", id)
+	req, err := c.newRequest("GET", path, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != 200 {
+		var gmsg GrafanaErrorMessage
+		dec := json.NewDecoder(resp.Body)
+		dec.Decode(&gmsg)
+		return nil, &GrafanaError{resp.StatusCode, gmsg.Message}
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &Folder{}
+	err = json.Unmarshal(data, &result)
+	return result, err
+}
