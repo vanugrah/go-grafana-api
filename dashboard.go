@@ -22,7 +22,7 @@ type DashboardSaveResponse struct {
 }
 
 type DashboardDeleteResponse struct {
-	Title	string 	`json:"title"`
+	Title string `json:"title"`
 }
 
 type Dashboard struct {
@@ -30,11 +30,17 @@ type Dashboard struct {
 	Model map[string]interface{} `json:"dashboard"`
 }
 
-func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool, folderId int) (*DashboardSaveResponse, error) {
+type DashboardSaveOpts struct {
+	Model     map[string]interface{} `json:"dashboard"`
+	Overwrite bool                   `json:"overwrite"`
+	FolderID  int                    `json:"folderId"`
+}
+
+func (c *Client) SaveDashboard(d *DashboardSaveOpts) (*DashboardSaveResponse, error) {
 	wrapper := map[string]interface{}{
-		"dashboard": model,
-		"overwrite": overwrite,
-		"folderId":  folderId,
+		"dashboard": d.Model,
+		"overwrite": d.Overwrite,
+		"folderId":  d.FolderID,
 	}
 	data, err := json.Marshal(wrapper)
 	if err != nil {
