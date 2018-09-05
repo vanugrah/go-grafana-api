@@ -37,12 +37,7 @@ type DashboardSaveOpts struct {
 }
 
 func (c *Client) SaveDashboard(d *DashboardSaveOpts) (*DashboardSaveResponse, error) {
-	wrapper := map[string]interface{}{
-		"dashboard": d.Model,
-		"overwrite": d.Overwrite,
-		"folderId":  d.FolderID,
-	}
-	data, err := json.Marshal(wrapper)
+	data, err := json.Marshal(d)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to marshall dashboard JSON")
 	}
