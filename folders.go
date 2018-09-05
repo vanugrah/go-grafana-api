@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"fmt"
 	"io/ioutil"
 
 	"github.com/pkg/errors"
@@ -47,7 +46,7 @@ func (c *Client) GetAllFolders() ([]Folder, error) {
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return folders, fmt.Errorf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
+		return folders, GrafanaError{resp.StatusCode, gmsg.Message}
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
@@ -98,8 +97,8 @@ func (c *Client) GetAllFolders() ([]Folder, error) {
 // 	return result, err
 // }
 
-// func (c *Client) GetFolderByUID(slug string) (*Folder, error) {
-// 	path := fmt.Sprintf("/api/folders/%s", slug)
+// func (c *Client) GetFolderByUID(uid string) (*Folder, error) {
+// 	path := fmt.Sprintf("/api/folders/%s", uid)
 // 	req, err := c.newRequest("GET", path, nil, nil)
 // 	if err != nil {
 // 		return nil, err
@@ -114,7 +113,7 @@ func (c *Client) GetAllFolders() ([]Folder, error) {
 // 		var gmsg GrafanaErrorMessage
 // 		dec := json.NewDecoder(resp.Body)
 // 		dec.Decode(&gmsg)
-// 		errMsg := fmt.Sprintf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
+// 		return nil, fmt.Errorf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
 // 	}
 
 // 	data, err := ioutil.ReadAll(resp.Body)
