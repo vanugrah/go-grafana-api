@@ -55,7 +55,7 @@ func (c *Client) GetAllFolders() ([]Folder, error) {
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return folders, &GrafanaError{resp.StatusCode, gmsg.Message}
+		return nil, &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
@@ -86,7 +86,7 @@ func (c *Client) GetFolderByUID(uid string) (*Folder, error) {
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return nil, &GrafanaError{resp.StatusCode, gmsg.Message}
+		return nil, &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
@@ -115,7 +115,7 @@ func (c *Client) GetFolderByID(id int) (*Folder, error) {
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return nil, &GrafanaError{resp.StatusCode, gmsg.Message}
+		return nil, &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
@@ -147,7 +147,7 @@ func (c *Client) CreateFolder(folder *FolderCreateOpts) (*Folder, error) {
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return nil, &GrafanaError{resp.StatusCode, gmsg.Message}
+		return nil, &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	data, err = ioutil.ReadAll(resp.Body)
@@ -180,7 +180,7 @@ func (c *Client) UpdateFolder(folder *FolderUpdateOpts) (*Folder, error) {
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return nil, &GrafanaError{resp.StatusCode, gmsg.Message}
+		return nil, &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	data, err = ioutil.ReadAll(resp.Body)
@@ -209,7 +209,7 @@ func (c *Client) DeleteFolderByUID(uid string) error {
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return &GrafanaError{resp.StatusCode, gmsg.Message}
+		return &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	return nil

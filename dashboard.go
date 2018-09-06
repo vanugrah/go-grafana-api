@@ -3,6 +3,7 @@ package gapi
 import (
 	"bytes"
 	"encoding/json"
+	"time"
 
 	"fmt"
 	"io/ioutil"
@@ -10,30 +11,47 @@ import (
 	"github.com/pkg/errors"
 )
 
-type DashboardMeta struct {
-	IsStarred bool   `json:"isStarred"`
-	Slug      string `json:"slug"`
-}
-
-type DashboardSaveResponse struct {
-	Slug    string `json:"slug"`
-	Status  string `json:"status"`
-	Version int64  `json:"version"`
-}
-
-type DashboardDeleteResponse struct {
-	Title string `json:"title"`
-}
-
 type Dashboard struct {
 	Meta  DashboardMeta          `json:"meta"`
 	Model map[string]interface{} `json:"dashboard"`
+}
+
+type DashboardMeta struct {
+	IsStarred   bool      `json:"isStarred"`
+	Type        string    `json:"type"`
+	CanSave     bool      `json:"canSave"`
+	CanEdit     bool      `json:"canEdit"`
+	CanAdmin    bool      `json:"canAdmin"`
+	CanStar     bool      `json:"canStar"`
+	Slug        string    `json:"slug"`
+	Url         string    `json:"url"`
+	Expires     time.Time `json:"expires"`
+	Created     time.Time `json:"created"`
+	Updated     time.Time `json:"updated"`
+	UpdatedBy   string    `json:"updatedBy"`
+	CreatedBy   string    `json:"createdBy"`
+	Version     int       `json:"version"`
+	HasAcl      bool      `json:"hasAcl"`
+	IsFolder    bool      `json:"isFolder"`
+	FolderId    int       `json:"folderId"`
+	FolderTitle string    `json:"folderTitle"`
+	FolderUrl   string    `json:"folderUrl"`
+	Provisioned bool      `json:"provisioned"`
 }
 
 type DashboardSaveOpts struct {
 	Model     map[string]interface{} `json:"dashboard"`
 	Overwrite bool                   `json:"overwrite"`
 	FolderID  int                    `json:"folderId"`
+}
+
+type DashboardSaveResponse struct {
+	Id      int    `json:"id"`
+	Uid     string `json:"uid"`
+	Url     string `json:"url"`
+	Slug    string `json:"slug"`
+	Status  string `json:"status"`
+	Version int64  `json:"version"`
 }
 
 func (c *Client) SaveDashboard(d *DashboardSaveOpts) (*DashboardSaveResponse, error) {
@@ -55,7 +73,7 @@ func (c *Client) SaveDashboard(d *DashboardSaveOpts) (*DashboardSaveResponse, er
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return nil, &GrafanaError{resp.StatusCode, gmsg.Message}
+		return nil, &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	data, err = ioutil.ReadAll(resp.Body)
@@ -68,8 +86,8 @@ func (c *Client) SaveDashboard(d *DashboardSaveOpts) (*DashboardSaveResponse, er
 	return result, err
 }
 
-func (c *Client) Dashboard(slug string) (*Dashboard, error) {
-	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
+func (c *Client) GetDashboardByUID(uid string) (*Dashboard, error) {
+	path := fmt.Sprintf("/api/dashboards/uid/%s", uid)
 	req, err := c.newRequest("GET", path, nil, nil)
 	if err != nil {
 		return nil, err
@@ -79,8 +97,12 @@ func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if resp.StatusCode != 200 {
-		return nil, errors.New(resp.Status)
+		var gmsg GrafanaErrorMessage
+		dec := json.NewDecoder(resp.Body)
+		dec.Decode(&gmsg)
+		return nil, &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
