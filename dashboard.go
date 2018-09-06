@@ -114,8 +114,8 @@ func (c *Client) GetDashboardByUID(uid string) (*Dashboard, error) {
 	return result, err
 }
 
-func (c *Client) DeleteDashboard(slug string) error {
-	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
+func (c *Client) DeleteDashboardByUID(uid string) error {
+	path := fmt.Sprintf("/api/dashboards/uid/%s", uid)
 	req, err := c.newRequest("DELETE", path, nil, nil)
 	if err != nil {
 		return err
@@ -129,7 +129,7 @@ func (c *Client) DeleteDashboard(slug string) error {
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return fmt.Errorf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
+		return &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	return nil
