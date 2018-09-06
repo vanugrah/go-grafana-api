@@ -3,6 +3,7 @@ package gapi
 import (
 	"bytes"
 	"encoding/json"
+	"time"
 
 	"fmt"
 	"io/ioutil"
@@ -10,28 +11,50 @@ import (
 	"github.com/pkg/errors"
 )
 
-type DashboardMeta struct {
-	IsStarred bool   `json:"isStarred"`
-	Slug      string `json:"slug"`
-}
-
-type DashboardSaveResponse struct {
-	Slug    string `json:"slug"`
-	Status  string `json:"status"`
-	Version int64  `json:"version"`
-}
-
 type Dashboard struct {
 	Meta  DashboardMeta          `json:"meta"`
 	Model map[string]interface{} `json:"dashboard"`
 }
 
-func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*DashboardSaveResponse, error) {
-	wrapper := map[string]interface{}{
-		"dashboard": model,
-		"overwrite": overwrite,
-	}
-	data, err := json.Marshal(wrapper)
+type DashboardMeta struct {
+	Type        string    `json:"type"`
+	CanSave     bool      `json:"canSave"`
+	CanEdit     bool      `json:"canEdit"`
+	CanAdmin    bool      `json:"canAdmin"`
+	CanStar     bool      `json:"canStar"`
+	Slug        string    `json:"slug"`
+	Url         string    `json:"url"`
+	Expires     time.Time `json:"expires"`
+	Created     time.Time `json:"created"`
+	Updated     time.Time `json:"updated"`
+	UpdatedBy   string    `json:"updatedBy"`
+	CreatedBy   string    `json:"createdBy"`
+	Version     int       `json:"version"`
+	HasAcl      bool      `json:"hasAcl"`
+	IsFolder    bool      `json:"isFolder"`
+	FolderId    int       `json:"folderId"`
+	FolderTitle string    `json:"folderTitle"`
+	FolderUrl   string    `json:"folderUrl"`
+	Provisioned bool      `json:"provisioned"`
+}
+
+type DashboardSaveOpts struct {
+	Model     map[string]interface{} `json:"dashboard"`
+	Overwrite bool                   `json:"overwrite"`
+	FolderID  int                    `json:"folderId"`
+}
+
+type DashboardSaveResponse struct {
+	Id      int    `json:"id"`
+	Uid     string `json:"uid"`
+	Url     string `json:"url"`
+	Slug    string `json:"slug"`
+	Status  string `json:"status"`
+	Version int64  `json:"version"`
+}
+
+func (c *Client) SaveDashboard(d *DashboardSaveOpts) (*DashboardSaveResponse, error) {
+	data, err := json.Marshal(d)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to marshall dashboard JSON")
 	}
@@ -49,7 +72,7 @@ func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*D
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return nil, fmt.Errorf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
+		return nil, &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	data, err = ioutil.ReadAll(resp.Body)
@@ -62,8 +85,8 @@ func (c *Client) SaveDashboard(model map[string]interface{}, overwrite bool) (*D
 	return result, err
 }
 
-func (c *Client) Dashboard(slug string) (*Dashboard, error) {
-	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
+func (c *Client) GetDashboardByUID(uid string) (*Dashboard, error) {
+	path := fmt.Sprintf("/api/dashboards/uid/%s", uid)
 	req, err := c.newRequest("GET", path, nil, nil)
 	if err != nil {
 		return nil, err
@@ -73,8 +96,12 @@ func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if resp.StatusCode != 200 {
-		return nil, errors.New(resp.Status)
+		var gmsg GrafanaErrorMessage
+		dec := json.NewDecoder(resp.Body)
+		dec.Decode(&gmsg)
+		return nil, &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
@@ -87,8 +114,8 @@ func (c *Client) Dashboard(slug string) (*Dashboard, error) {
 	return result, err
 }
 
-func (c *Client) DeleteDashboard(slug string) error {
-	path := fmt.Sprintf("/api/dashboards/db/%s", slug)
+func (c *Client) DeleteDashboardByUID(uid string) error {
+	path := fmt.Sprintf("/api/dashboards/uid/%s", uid)
 	req, err := c.newRequest("DELETE", path, nil, nil)
 	if err != nil {
 		return err
@@ -102,7 +129,7 @@ func (c *Client) DeleteDashboard(slug string) error {
 		var gmsg GrafanaErrorMessage
 		dec := json.NewDecoder(resp.Body)
 		dec.Decode(&gmsg)
-		return fmt.Errorf("Request to Grafana returned %+v status code with the following message: %+v", resp.StatusCode, gmsg.Message)
+		return &GrafanaError{resp.StatusCode, fmt.Sprint(gmsg)}
 	}
 
 	return nil
