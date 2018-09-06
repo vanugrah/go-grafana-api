@@ -152,3 +152,25 @@ func (c *Client) CreateFolder(folder *FolderCreateOpts) (*Folder, error) {
 	err = json.Unmarshal(data, &result)
 	return result, err
 }
+
+func (c *Client) DeleteFolderByUID(uid string) error {
+	path := fmt.Sprintf("/api/folders/%s", uid)
+	req, err := c.newRequest("DELETE", path, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		var gmsg GrafanaErrorMessage
+		dec := json.NewDecoder(resp.Body)
+		dec.Decode(&gmsg)
+		return &GrafanaError{resp.StatusCode, gmsg.Message}
+	}
+
+	return nil
+}
