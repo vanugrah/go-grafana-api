@@ -32,6 +32,13 @@ type FolderCreateOpts struct {
 	Uid   string `json:"uid"`
 }
 
+type FolderUpdateOpts struct {
+	Title     string `json:"title"`
+	Uid       string `json:"uid"`
+	Version   int    `json:"version, omitempty"`
+	Overwrite bool   `json:"overwrite"`
+}
+
 func (c *Client) GetAllFolders() ([]Folder, error) {
 	folders := make([]Folder, 0)
 	req, err := c.newRequest("GET", "/api/folders/", nil, nil)
@@ -127,6 +134,39 @@ func (c *Client) CreateFolder(folder *FolderCreateOpts) (*Folder, error) {
 		return nil, errors.Wrap(err, "Failed to marshall folder JSON")
 	}
 	req, err := c.newRequest("POST", "/api/folders", nil, bytes.NewBuffer(data))
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to perform HTTP request")
+	}
+
+	if resp.StatusCode != 200 {
+		var gmsg GrafanaErrorMessage
+		dec := json.NewDecoder(resp.Body)
+		dec.Decode(&gmsg)
+		return nil, &GrafanaError{resp.StatusCode, gmsg.Message}
+	}
+
+	data, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &Folder{}
+	err = json.Unmarshal(data, &result)
+	return result, err
+}
+
+func (c *Client) UpdateFolder(folder *FolderUpdateOpts) (*Folder, error) {
+	path := fmt.Sprintf("/api/folders/%s", folder.Uid)
+	data, err := json.Marshal(folder)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to marshall folder JSON")
+	}
+	req, err := c.newRequest("PUT", path, nil, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
 	}
