@@ -11,7 +11,7 @@ type GrafanaErrorMessage struct {
 
 func (gem GrafanaErrorMessage) String() string {
 	if gem.Status != "" {
-		return fmt.Sprintf("%s. Status: %s", gem.Message, gem.Status)
+		return fmt.Sprintf("%s\" status=\"%s", gem.Message, gem.Status)
 	}
 	return gem.Message
 }
@@ -22,5 +22,5 @@ type GrafanaError struct {
 }
 
 func (ge GrafanaError) Error() string {
-	return fmt.Sprintf("Request to Grafana returned %d status code with the following message: %s", ge.StatusCode, ge.Message)
+	return fmt.Sprintf("Request to Grafana returned status-code=\"%d\" message=\"%s\"", ge.StatusCode, ge.Message)
 }
