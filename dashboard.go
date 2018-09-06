@@ -17,7 +17,6 @@ type Dashboard struct {
 }
 
 type DashboardMeta struct {
-	IsStarred   bool      `json:"isStarred"`
 	Type        string    `json:"type"`
 	CanSave     bool      `json:"canSave"`
 	CanEdit     bool      `json:"canEdit"`
