@@ -79,7 +79,7 @@ func (c *Client) GetFolderByUID(uid string) (*Folder, error) {
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Unable to perform HTTP request")
 	}
 
 	if resp.StatusCode != 200 {
@@ -108,7 +108,7 @@ func (c *Client) GetFolderByID(id int) (*Folder, error) {
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Unable to perform HTTP request")
 	}
 
 	if resp.StatusCode != 200 {
@@ -202,7 +202,7 @@ func (c *Client) DeleteFolderByUID(uid string) error {
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Unable to perform HTTP request")
 	}
 
 	if resp.StatusCode != 200 {

@@ -94,7 +94,7 @@ func (c *Client) GetDashboardByUID(uid string) (*Dashboard, error) {
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Unable to perform HTTP request")
 	}
 
 	if resp.StatusCode != 200 {
@@ -123,7 +123,7 @@ func (c *Client) DeleteDashboardByUID(uid string) error {
 
 	resp, err := c.Do(req)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Unable to perform HTTP request")
 	}
 	if resp.StatusCode != 200 {
 		var gmsg GrafanaErrorMessage
